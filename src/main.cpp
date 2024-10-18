@@ -5,18 +5,18 @@
 #include <BLE2902.h>
 #include <esp32-hal.h>
 #include <TFT_eSPI.h>  // Include the TFT display library
-#include "Tog.h"
+#include "Tog.h" // Include the boot image
 
 #define SERVICE_UUID        "0000180d-0000-1000-8000-00805f9b34fb"
 #define CHARACTERISTIC_UUID "00002a37-0000-1000-8000-00805f9b34fb"
 
 // Function declaration for wrapped text
-void drawWrappedText(const char* text, int x, int y);
+void drawWrappedText(const char* text, int x, int y); // Forward declaration
 
 // BLE server and characteristic
-BLEServer *pServer = NULL;
-BLECharacteristic *pCharacteristic = NULL;
-bool deviceConnected = false;
+BLEServer *pServer = NULL;  // BLE server object
+BLECharacteristic *pCharacteristic = NULL;  // Characteristic to send data
+bool deviceConnected = false; // Connection status
 
 const int ledPin = LED_BUILTIN;  // Pin for the LED
 const int buttonPin = 0;  // Built-in button for LilyGO T-Display 1.1  // Pin for the button
@@ -50,9 +50,9 @@ class MyServerCallbacks: public BLEServerCallbacks {
 };
 
 // Setup callback for characteristic write
-class MyCallbacks : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic *pCharacteristic) {
-    std::string value = pCharacteristic->getValue();
+class MyCallbacks : public BLECharacteristicCallbacks { 
+  void onWrite(BLECharacteristic *pCharacteristic) {  
+    std::string value = pCharacteristic->getValue();  // Get the value written to the characteristic
 
     if (value.length() > 0) {
       Serial.print("Received from app: ");
