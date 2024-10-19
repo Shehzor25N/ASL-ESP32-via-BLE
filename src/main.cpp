@@ -18,15 +18,13 @@ BLEServer *pServer = NULL;                 // BLE server object
 BLECharacteristic *pCharacteristic = NULL; // Characteristic to send data
 bool deviceConnected = false;              // Connection status
 
-const int buttonPin = 35;       // Button GPIO 35 for toggling text size
+const int buttonPin = 35; // Button GPIO 35 for toggling text size
 unsigned long lastTime = 0;
-unsigned long timerDelay = 100;                                        // 0.1 second interval
+unsigned long timerDelay = 100; // 0.1 second interval
 
 int16_t dataArray[] = {20, -19, 63, 59, 42, -1, 1, 0, 956, 1516, 885}; // Example data array
 
 TFT_eSPI tft = TFT_eSPI(); // Create TFT object
-
-
 
 // Helper function to display a small status message in the bottom-left corner
 void displayStatusMessage(const char *message, uint16_t textColor, uint16_t bgColor);
@@ -48,9 +46,9 @@ class MyServerCallbacks : public BLEServerCallbacks
 
     // Draw a green rounded rectangle for "Connected" status in bottom-left corner
     uint16_t rectX = 0;
-    uint16_t rectY = tft.height() - 20; // Position at bottom-left corner
+    uint16_t rectY = tft.height() - 20;                   // Position at bottom-left corner
     uint16_t rectWidth = tft.textWidth("Connected") + 10; // Width slightly larger than text
-    uint16_t rectHeight = tft.fontHeight() + 4; // Height slightly larger than text
+    uint16_t rectHeight = tft.fontHeight() + 4;           // Height slightly larger than text
 
     tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, TFT_GREEN); // Rounded rectangle with curved corners
     tft.setTextColor(TFT_BLACK, TFT_GREEN);
@@ -66,9 +64,9 @@ class MyServerCallbacks : public BLEServerCallbacks
 
     // Draw a red rounded rectangle for "Disconnected" status in bottom-left corner
     uint16_t rectX = 0;
-    uint16_t rectY = tft.height() - 20; // Position at bottom-left corner
+    uint16_t rectY = tft.height() - 20;                      // Position at bottom-left corner
     uint16_t rectWidth = tft.textWidth("Disconnected") + 10; // Width slightly larger than text
-    uint16_t rectHeight = tft.fontHeight() + 4; // Height slightly larger than text
+    uint16_t rectHeight = tft.fontHeight() + 4;              // Height slightly larger than text
 
     tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, TFT_RED); // Rounded rectangle with curved corners
     tft.setTextColor(TFT_WHITE, TFT_RED);
@@ -101,7 +99,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
 
       // Set the text size based on the current textSize value
       tft.setTextSize(textSize);
-      tft.setTextColor(TFT_WHITE, TFT_BLACK); // Set text color and background
+      tft.setTextColor(TFT_WHITE, TFT_BLACK);       // Set text color and background
       drawWrappedText(lastMessage.c_str(), 10, 20); // Display the received text with wrapping
 
       // Echo back the received data
@@ -114,7 +112,6 @@ class MyCallbacks : public BLECharacteristicCallbacks
 
 void setup()
 {
-  
 
   pinMode(buttonPin, INPUT_PULLUP); // Initialize the button pin as an input with pull-up resistor
 
@@ -203,7 +200,6 @@ void loop()
     }
   }
 }
-
 
 // Helper function to display a small status message in the bottom-left corner
 void displayStatusMessage(const char *message, uint16_t textColor, uint16_t bgColor)
