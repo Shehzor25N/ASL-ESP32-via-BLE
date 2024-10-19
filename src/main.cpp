@@ -35,16 +35,17 @@ int textSize = 1;
 // Global variable to store the last displayed message
 String lastMessage = "";
 
-void drawStatusMessage(const char* message, uint16_t textColor, uint16_t bgColor) {
-    uint16_t rectX = 0;
-    uint16_t rectY = tft.height() - 20;                      // Position at bottom-left corner
-    uint16_t rectWidth = tft.textWidth(message) + 10;        // Width slightly larger than text
-    uint16_t rectHeight = tft.fontHeight() + 4;              // Height slightly larger than text
+void drawStatusMessage(const char *message, uint16_t textColor, uint16_t bgColor)
+{
+  uint16_t rectX = 0;
+  uint16_t rectY = tft.height() - 20;               // Position at bottom-left corner
+  uint16_t rectWidth = tft.textWidth(message) + 10; // Width slightly larger than text
+  uint16_t rectHeight = tft.fontHeight() + 4;       // Height slightly larger than text
 
-    tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, bgColor); // Rounded rectangle with curved corners
-    tft.setTextColor(textColor, bgColor);
-    tft.setTextSize(1);
-    tft.drawString(message, rectX + 5, rectY + 2); // Position text with padding inside the rounded rectangle
+  tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, bgColor); // Rounded rectangle with curved corners
+  tft.setTextColor(textColor, bgColor);
+  tft.setTextSize(1);
+  tft.drawString(message, rectX + 5, rectY + 2); // Position text with padding inside the rounded rectangle
 }
 
 // Setup callbacks for connect and disconnect
@@ -70,8 +71,6 @@ class MyServerCallbacks : public BLEServerCallbacks
     drawStatusMessage("Disconnected", TFT_WHITE, TFT_RED);
   }
 };
-
-
 
 // Setup callback for characteristic write
 class MyCallbacks : public BLECharacteristicCallbacks
@@ -108,17 +107,18 @@ class MyCallbacks : public BLECharacteristicCallbacks
   }
 };
 
-
-void drawLoadingIcon(int x, int y, int frame) {
-  int radius = 10; // Radius of the loading icon
-  int segments = 12; // Number of segments in the loading icon
+void drawLoadingIcon(int x, int y, int frame)
+{
+  int radius = 10;                      // Radius of the loading icon
+  int segments = 12;                    // Number of segments in the loading icon
   int angle = (360 / segments) * frame; // Calculate the angle for the current frame
 
   // Clear the previous frame
   tft.fillCircle(x, y, radius + 2, TFT_BLACK);
 
   // Draw the current frame
-  for (int i = 0; i < segments; i++) {
+  for (int i = 0; i < segments; i++)
+  {
     int segmentAngle = angle + (360 / segments) * i;
     int x1 = x + radius * cos(radians(segmentAngle));
     int y1 = y + radius * sin(radians(segmentAngle));
@@ -127,7 +127,6 @@ void drawLoadingIcon(int x, int y, int frame) {
     tft.drawLine(x1, y1, x2, y2, TFT_WHITE);
   }
 }
-
 
 void setup()
 {
@@ -156,7 +155,8 @@ void setup()
   // Draw loading icon
   int loadingX = tft.width() / 2;
   int loadingY = y + tft.fontHeight() + 20; // Position below the text
-  for (int frame = 0; frame < 12; frame++) {
+  for (int frame = 0; frame < 12; frame++)
+  {
     drawLoadingIcon(loadingX, loadingY, frame);
     delay(200); // Adjust the delay for the desired animation speed
   }
