@@ -1,4 +1,7 @@
-<!--
+
+![ASL (1920 x 1080 px)](https://github.com/user-attachments/assets/be385f93-0a7f-495c-b806-76b659ba9dc9)
+
+
 # ASLBLE Project
 
 This repository contains the ASLBLE project, which is designed to facilitate communication using American Sign Language (ASL) through Bluetooth Low Energy (BLE) technology.
@@ -13,5 +16,3 @@ The purpose of this project is to create a system that can recognize ASL gesture
 - **Bluetooth Low Energy (BLE) Communication**: Transmits recognized gestures to a connected device.
 - **User-Friendly Interface**: Provides an easy-to-use interface for users to interact with the system.
 
--->
-![ASL (1920 x 1080 px)](https://github.com/user-attachments/assets/be385f93-0a7f-495c-b806-76b659ba9dc9)
