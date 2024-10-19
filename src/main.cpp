@@ -35,6 +35,18 @@ int textSize = 1;
 // Global variable to store the last displayed message
 String lastMessage = "";
 
+void drawStatusMessage(const char* message, uint16_t textColor, uint16_t bgColor) {
+    uint16_t rectX = 0;
+    uint16_t rectY = tft.height() - 20;                      // Position at bottom-left corner
+    uint16_t rectWidth = tft.textWidth(message) + 10;        // Width slightly larger than text
+    uint16_t rectHeight = tft.fontHeight() + 4;              // Height slightly larger than text
+
+    tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, bgColor); // Rounded rectangle with curved corners
+    tft.setTextColor(textColor, bgColor);
+    tft.setTextSize(1);
+    tft.drawString(message, rectX + 5, rectY + 2); // Position text with padding inside the rounded rectangle
+}
+
 // Setup callbacks for connect and disconnect
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -44,16 +56,8 @@ class MyServerCallbacks : public BLEServerCallbacks
     deviceConnected = true;
     Serial.println("Connected to central device");
 
-    // Draw a green rounded rectangle for "Connected" status in bottom-left corner
-    uint16_t rectX = 0;
-    uint16_t rectY = tft.height() - 20;                   // Position at bottom-left corner
-    uint16_t rectWidth = tft.textWidth("Connected") + 10; // Width slightly larger than text
-    uint16_t rectHeight = tft.fontHeight() + 4;           // Height slightly larger than text
-
-    tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, TFT_GREEN); // Rounded rectangle with curved corners
-    tft.setTextColor(TFT_BLACK, TFT_GREEN);
-    tft.setTextSize(1);
-    tft.drawString("Connected", rectX + 5, rectY + 2); // Position text with padding inside the rounded rectangle
+    // Draw "Connected" status message
+    drawStatusMessage("Connected", TFT_BLACK, TFT_GREEN);
   }
 
   void onDisconnect(BLEServer *pServer)
@@ -62,18 +66,12 @@ class MyServerCallbacks : public BLEServerCallbacks
     BLEDevice::startAdvertising(); // Restart advertising
     Serial.println("Disconnected from central device");
 
-    // Draw a red rounded rectangle for "Disconnected" status in bottom-left corner
-    uint16_t rectX = 0;
-    uint16_t rectY = tft.height() - 20;                      // Position at bottom-left corner
-    uint16_t rectWidth = tft.textWidth("Disconnected") + 10; // Width slightly larger than text
-    uint16_t rectHeight = tft.fontHeight() + 4;              // Height slightly larger than text
-
-    tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, TFT_RED); // Rounded rectangle with curved corners
-    tft.setTextColor(TFT_WHITE, TFT_RED);
-    tft.setTextSize(1);
-    tft.drawString("Disconnected", rectX + 5, rectY + 2); // Position text with padding inside the rounded rectangle
+    // Draw "Disconnected" status message
+    drawStatusMessage("Disconnected", TFT_WHITE, TFT_RED);
   }
 };
+
+
 
 // Setup callback for characteristic write
 class MyCallbacks : public BLECharacteristicCallbacks
