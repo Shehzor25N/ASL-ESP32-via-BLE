@@ -19,9 +19,10 @@ BLECharacteristic *pCharacteristic = NULL; // Characteristic to send data
 bool deviceConnected = false;              // Connection status
 
 const int ledPin = LED_BUILTIN; // Pin for the LED
-const int buttonPin = 0;        // Built-in button for LilyGO T-Display 1.1  // Pin for the button
+const int buttonPin = 35;       // Button GPIO 35 for toggling text size
 unsigned long lastTime = 0;
 unsigned long timerDelay = 100;                                        // 0.1 second interval
+
 int16_t dataArray[] = {20, -19, 63, 59, 42, -1, 1, 0, 956, 1516, 885}; // Example data array
 
 TFT_eSPI tft = TFT_eSPI(); // Create TFT object
@@ -32,23 +33,49 @@ void blinkLED(int seconds);
 // Helper function to display a small status message in the bottom-left corner
 void displayStatusMessage(const char *message, uint16_t textColor, uint16_t bgColor);
 
+// Global variable to track text size (initially set to 1)
+int textSize = 1;
+
+// Global variable to store the last displayed message
+String lastMessage = "";
+
 // Setup callbacks for connect and disconnect
 class MyServerCallbacks : public BLEServerCallbacks
 {
   void onConnect(BLEServer *pServer)
   {
-    tft.fillScreen(TFT_BLACK); // Clear the "Waiting for connection..." message
+    tft.fillScreen(TFT_BLACK); // Clear the screen
     deviceConnected = true;
     Serial.println("Connected to central device");
-    displayStatusMessage("Connected", TFT_BLACK, TFT_GREEN); // Small connected message in bottom left
-  };
+
+    // Draw a green rounded rectangle for "Connected" status in bottom-left corner
+    uint16_t rectX = 0;
+    uint16_t rectY = tft.height() - 20; // Position at bottom-left corner
+    uint16_t rectWidth = tft.textWidth("Connected") + 10; // Width slightly larger than text
+    uint16_t rectHeight = tft.fontHeight() + 4; // Height slightly larger than text
+
+    tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, TFT_GREEN); // Rounded rectangle with curved corners
+    tft.setTextColor(TFT_BLACK, TFT_GREEN);
+    tft.setTextSize(1);
+    tft.drawString("Connected", rectX + 5, rectY + 2); // Position text with padding inside the rounded rectangle
+  }
 
   void onDisconnect(BLEServer *pServer)
   {
     deviceConnected = false;
     BLEDevice::startAdvertising(); // Restart advertising
     Serial.println("Disconnected from central device");
-    displayStatusMessage("Disconnected", TFT_WHITE, TFT_RED); // Small disconnected message in bottom left
+
+    // Draw a red rounded rectangle for "Disconnected" status in bottom-left corner
+    uint16_t rectX = 0;
+    uint16_t rectY = tft.height() - 20; // Position at bottom-left corner
+    uint16_t rectWidth = tft.textWidth("Disconnected") + 10; // Width slightly larger than text
+    uint16_t rectHeight = tft.fontHeight() + 4; // Height slightly larger than text
+
+    tft.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 5, TFT_RED); // Rounded rectangle with curved corners
+    tft.setTextColor(TFT_WHITE, TFT_RED);
+    tft.setTextSize(1);
+    tft.drawString("Disconnected", rectX + 5, rectY + 2); // Position text with padding inside the rounded rectangle
   }
 };
 
@@ -71,9 +98,13 @@ class MyCallbacks : public BLECharacteristicCallbacks
       // Clear only the main area, without clearing the status message
       tft.fillRect(0, 0, tft.width(), tft.height() - 20, TFT_BLACK); // Clear screen, excluding bottom area
 
-      // Display the received text on the TFT screen
+      // Store the received message
+      lastMessage = String(value.c_str());
+
+      // Set the text size based on the current textSize value
+      tft.setTextSize(textSize);
       tft.setTextColor(TFT_WHITE, TFT_BLACK); // Set text color and background
-      drawWrappedText(value.c_str(), 10, 20); // Display the received text with wrapping
+      drawWrappedText(lastMessage.c_str(), 10, 20); // Display the received text with wrapping
 
       // Echo back the received data
       pCharacteristic->setValue((uint8_t *)value.c_str(), value.length());
@@ -97,7 +128,7 @@ void setup()
   tft.setSwapBytes(true); // Swap the byte order for the display
   tft.init();
   tft.pushImage(0, 0, 135, 240, Tog); // Display the boot image
-  delay(2000);                        // Show boot screen for 3 seconds
+  delay(2000);                        // Show boot screen for 2 seconds
 
   tft.fillScreen(TFT_BLACK); // Clear the screen after the boot screen
 
@@ -162,10 +193,13 @@ void loop()
     { // Button is pressed (LOW because of INPUT_PULLUP)
       Serial.println("Button pressed!");
 
-      // Send notification to the app
-      const char *buttonMessage = "B1PCXBNUJIOP"; // Unique button press code
-      pCharacteristic->setValue((uint8_t *)buttonMessage, strlen(buttonMessage));
-      pCharacteristic->notify();
+      // Toggle the text size between 1 and 2
+      textSize = (textSize == 1) ? 2 : 1;
+
+      // Clear the main area and redraw the last message with the new text size
+      tft.fillRect(0, 0, tft.width(), tft.height() - 20, TFT_BLACK); // Clear screen, excluding bottom area
+      tft.setTextSize(textSize);
+      drawWrappedText(lastMessage.c_str(), 10, 20); // Redraw the last message with the updated text size
 
       // Small delay to debounce the button
       delay(200);
