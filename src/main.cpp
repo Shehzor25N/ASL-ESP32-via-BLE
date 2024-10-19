@@ -18,7 +18,6 @@ BLEServer *pServer = NULL;                 // BLE server object
 BLECharacteristic *pCharacteristic = NULL; // Characteristic to send data
 bool deviceConnected = false;              // Connection status
 
-const int ledPin = LED_BUILTIN; // Pin for the LED
 const int buttonPin = 35;       // Button GPIO 35 for toggling text size
 unsigned long lastTime = 0;
 unsigned long timerDelay = 100;                                        // 0.1 second interval
@@ -27,8 +26,7 @@ int16_t dataArray[] = {20, -19, 63, 59, 42, -1, 1, 0, 956, 1516, 885}; // Exampl
 
 TFT_eSPI tft = TFT_eSPI(); // Create TFT object
 
-// Forward declare the blinkLED function
-void blinkLED(int seconds);
+
 
 // Helper function to display a small status message in the bottom-left corner
 void displayStatusMessage(const char *message, uint16_t textColor, uint16_t bgColor);
@@ -116,8 +114,7 @@ class MyCallbacks : public BLECharacteristicCallbacks
 
 void setup()
 {
-  pinMode(ledPin, OUTPUT);   // Initialize the LED pin as an output
-  digitalWrite(ledPin, LOW); // Ensure the LED is off initially
+  
 
   pinMode(buttonPin, INPUT_PULLUP); // Initialize the button pin as an input with pull-up resistor
 
@@ -207,20 +204,6 @@ void loop()
   }
 }
 
-// Function to blink the LED for a specified number of seconds
-void blinkLED(int seconds)
-{
-  int blinkInterval = 500;                           // 500 milliseconds (0.5 seconds) for each blink
-  int blinkCount = (seconds * 1000) / blinkInterval; // Number of times to blink in total
-
-  for (int i = 0; i < blinkCount; i++)
-  {
-    digitalWrite(ledPin, HIGH); // Turn the LED on
-    delay(blinkInterval / 2);   // Wait for half of the interval
-    digitalWrite(ledPin, LOW);  // Turn the LED off
-    delay(blinkInterval / 2);   // Wait for the other half of the interval
-  }
-}
 
 // Helper function to display a small status message in the bottom-left corner
 void displayStatusMessage(const char *message, uint16_t textColor, uint16_t bgColor)
