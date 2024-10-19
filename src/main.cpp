@@ -108,6 +108,27 @@ class MyCallbacks : public BLECharacteristicCallbacks
   }
 };
 
+
+void drawLoadingIcon(int x, int y, int frame) {
+  int radius = 10; // Radius of the loading icon
+  int segments = 12; // Number of segments in the loading icon
+  int angle = (360 / segments) * frame; // Calculate the angle for the current frame
+
+  // Clear the previous frame
+  tft.fillCircle(x, y, radius + 2, TFT_BLACK);
+
+  // Draw the current frame
+  for (int i = 0; i < segments; i++) {
+    int segmentAngle = angle + (360 / segments) * i;
+    int x1 = x + radius * cos(radians(segmentAngle));
+    int y1 = y + radius * sin(radians(segmentAngle));
+    int x2 = x + (radius - 3) * cos(radians(segmentAngle));
+    int y2 = y + (radius - 3) * sin(radians(segmentAngle));
+    tft.drawLine(x1, y1, x2, y2, TFT_WHITE);
+  }
+}
+
+
 void setup()
 {
 
@@ -131,6 +152,14 @@ void setup()
   int16_t x = (tft.width() - tft.textWidth("Waiting for connection...")) / 2;
   int16_t y = (tft.height() - tft.fontHeight()) / 2;
   drawWrappedText("Waiting for connection...", x, y); // Centered initial message
+
+  // Draw loading icon
+  int loadingX = tft.width() / 2;
+  int loadingY = y + tft.fontHeight() + 20; // Position below the text
+  for (int frame = 0; frame < 12; frame++) {
+    drawLoadingIcon(loadingX, loadingY, frame);
+    delay(200); // Adjust the delay for the desired animation speed
+  }
 
   // Initialize BLE
   BLEDevice::init("Interpreter Glove");
