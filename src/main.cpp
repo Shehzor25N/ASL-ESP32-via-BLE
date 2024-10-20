@@ -16,7 +16,7 @@
 Adafruit_MPU6050 mpu;
 
 // Flex sensors
-Flex flex[5] = {Flex(32), Flex(33), Flex(39), Flex(26), Flex(25)}; // Analog pins the flex sensors are on
+Flex flex[5] = {Flex(36), Flex(39), Flex(32), Flex(33), Flex(26)}; // Analog pins the flex sensors are on
 
 
 // Calibration variables for flex sensors
