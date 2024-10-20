@@ -6,9 +6,34 @@
 #include <esp32-hal.h>
 #include <TFT_eSPI.h> // Include the TFT display library
 #include "Tog.h"      // Include the boot image
+#include "FlexLibrary.h"
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
 
+
+
+// MPU6050 IMU
+Adafruit_MPU6050 mpu;
+
+// Flex sensors
+Flex flex[5] = {Flex(32), Flex(33), Flex(39), Flex(26), Flex(25)}; // Analog pins the flex sensors are on
+
+
+// Calibration variables for flex sensors
+#define VCC 3.3  // Supply voltage for flex sensors
+#define R_DIV 15150.0  // New R_DIV value for 3.3V setup
+// MAY HAVE TO USE 15.5K OHM FOR PULL UP RESISTOR
+#define flatResistance 32500.0  // Flat resistance of flex sensor
+#define bendResistance 76000.0  // Bent resistance of flex sensor
+
+
+// Define the UUIDs for the BLE service and characteristic
 #define SERVICE_UUID "0000180d-0000-1000-8000-00805f9b34fb"
 #define CHARACTERISTIC_UUID "00002a37-0000-1000-8000-00805f9b34fb"
+
+
+
+
 
 // Function declaration for wrapped text
 void drawWrappedText(const char *text, int x, int y); // Forward declaration
