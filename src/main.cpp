@@ -10,22 +10,31 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 
+
+
 // MPU6050 IMU
 Adafruit_MPU6050 mpu;
 
 // Flex sensors
 Flex flex[5] = {Flex(36), Flex(39), Flex(32), Flex(33), Flex(26)}; // Analog pins the flex sensors are on
 
+
 // Calibration variables for flex sensors
-#define VCC 3.3       // Supply voltage for flex sensors
-#define R_DIV 15150.0 // New R_DIV value for 3.3V setup
-// MAY HAVE TO USE 15.5K OHM FOR PULL UP RESISTOR
-#define flatResistance 32500.0 // Flat resistance of flex sensor
-#define bendResistance 76000.0 // Bent resistance of flex sensor
+#define VCC 3.3  // Supply voltage for flex sensors
+#define R_DIV 15150.0  // New R_DIV value for 3.3V setup
+#define flatResistance 32500.0  // Flat resistance of flex sensor
+#define bendResistance 76000.0  // Bent resistance of flex sensor
+
+const int CALIBRATION_ITERATIONS = 1000;
+const float MAX_SENSOR_VALUE = 4095.0;
 
 // Define the UUIDs for the BLE service and characteristic
 #define SERVICE_UUID "0000180d-0000-1000-8000-00805f9b34fb"
 #define CHARACTERISTIC_UUID "00002a37-0000-1000-8000-00805f9b34fb"
+
+
+// MAY HAVE TO USE 15.5K OHM FOR R-DIV RESISTOR
+
 
 // Function declaration for wrapped text
 void drawWrappedText(const char *text, int x, int y); // Forward declaration
@@ -39,8 +48,9 @@ const int buttonPin = 35; // Button GPIO 35 for toggling text size
 unsigned long lastTime = 0;
 unsigned long timerDelay = 100; // 0.1 second interval
 
-int16_t dataArray[] = {20, -19, 63, 59, 42, -1, 1, 0, 956, 1516, 885}; // Example data array
+int16_t dataArray[11] = {0}; // Initialize an empty data array with 11 elements
 
+// Initialize TFT display
 TFT_eSPI tft = TFT_eSPI(); // Create TFT object
 
 // Helper function to display a small status message in the bottom-left corner
@@ -148,19 +158,57 @@ void drawLoadingIcon(int x, int y, int frame)
 void setup()
 {
 
+  Serial.println("Adafruit MPU6050 test!");
+
+  // Try to initialize!
+  if (!mpu.begin()) {
+    Serial.println("Failed to find MPU6050 chip");
+    tft.setSwapBytes(true); // Swap the byte order for the display
+    tft.init();
+    tft.pushImage(0, 0, 135, 240, Tog); // Display the boot image
+  delay(2000);                        // Show boot screen for 2 seconds
+  tft.fillScreen(TFT_BLACK); // Clear the screen after the boot screen
+
+      tft.setRotation(1);                     // Set screen orientation
+  tft.fillScreen(TFT_BLACK);              // Set initial background color
+  tft.setTextColor(TFT_WHITE, TFT_BLACK); // Set text color and background
+  tft.setTextSize(1); 
+
+    int16_t x = (tft.width() - tft.textWidth("Failed to find MPU6050 chip")) / 2;
+  int16_t y = (tft.height() - tft.fontHeight()) / 2;
+  drawWrappedText("Failed to find MPU6050 chip                                       Connect SDA to Pin 21                     SCL to Pin 22 ", x, y); // Centered initial message
+  delay(5000);
+   tft.fillScreen(TFT_BLACK); 
+   drawWrappedText("Flex(36), Flex(39), Flex(32),    Flex(33), Flex(26)", x, y);
+    while (1) {
+      delay(10);
+    }
+  }
+  Serial.println("MPU6050 Found!");
+
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+
+
+
+  
+
   pinMode(buttonPin, INPUT_PULLUP); // Initialize the button pin as an input with pull-up resistor
 
   Serial.begin(115200);
   Serial.println("Starting BLE work!");
+
 
   // Initialize TFT
   tft.setSwapBytes(true); // Swap the byte order for the display
   tft.init();
   tft.pushImage(0, 0, 135, 240, Tog); // Display the boot image
   delay(2000);                        // Show boot screen for 2 seconds
-
   tft.fillScreen(TFT_BLACK); // Clear the screen after the boot screen
 
+
+  
   tft.setRotation(1);                     // Set screen orientation
   tft.fillScreen(TFT_BLACK);              // Set initial background color
   tft.setTextColor(TFT_WHITE, TFT_BLACK); // Set text color and background
@@ -204,15 +252,34 @@ void setup()
   Serial.println("Bluetooth device active, waiting for connections...");
 }
 
-void loop()
-{
-  if (deviceConnected)
-  {
-    if ((millis() - lastTime) > timerDelay)
-    {
-      // Send the int16_t array via BLE
-      pCharacteristic->setValue((uint8_t *)dataArray, sizeof(dataArray)); // Cast array to uint8_t* and send
-      pCharacteristic->notify();                                          // Notify the central device (app)
+
+
+void calibrateSensors() {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < CALIBRATION_ITERATIONS; j++) {
+            flex[i].Calibrate();
+        }
+        flex[i].updateVal();
+    }
+}
+
+void processSensorData(float* angles) {
+    for (int i = 0; i < 5; i++) {
+        flex[i].updateVal();
+        float Vflex = flex[i].getSensorValue() * VCC / 4095.0;
+        float Rflex = R_DIV * (VCC / Vflex - 1.0);
+        float angle = map(Rflex, flatResistance, bendResistance, 0, 90);
+        if (angle < 0) {
+            angle = 0;
+        }
+        dataArray[i] = static_cast<int16_t>(angle);
+    }
+}
+
+void sendDataIfNeeded() {
+    if ((millis() - lastTime) > timerDelay) {
+        pCharacteristic->setValue((uint8_t *)dataArray, sizeof(dataArray));
+        pCharacteristic->notify();      // Notify the central device (app)
 
       Serial.println("Sent int16_t data array to app:");
 
@@ -221,9 +288,41 @@ void loop()
         Serial.print(dataArray[i]);
         Serial.print(" ");
       }
-      Serial.println();
 
+      Serial.println();
       lastTime = millis();
+    }
+}
+
+void loop()
+{    
+ if (deviceConnected)
+  {
+    float angles[5];
+    sensors_event_t a, g, temp;
+    mpu.getEvent(&a, &g, &temp);
+
+    calibrateSensors();
+    processSensorData(angles);
+    
+
+    // Read gyroscope values
+    dataArray[5] = static_cast<int16_t>(g.gyro.x * 100); // Scale to avoid floating point
+    dataArray[6] = static_cast<int16_t>(g.gyro.y * 100);
+    dataArray[7] = static_cast<int16_t>(g.gyro.z * 100);
+
+    // Read accelerometer values
+    dataArray[8] = static_cast<int16_t>(a.acceleration.x * 100); // Scale to avoid floating point
+    dataArray[9] = static_cast<int16_t>(a.acceleration.y * 100);
+    dataArray[10] = static_cast<int16_t>(a.acceleration.z * 100);
+
+    sendDataIfNeeded();
+
+    for (int i = 0; i < 11; i++) {
+        Serial.print(dataArray[i]);
+        if (i < 10) {
+            Serial.print(", ");
+        }
     }
 
     // Check if the button is pressed
