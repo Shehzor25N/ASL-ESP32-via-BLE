@@ -21,9 +21,9 @@ Flex flex[5] = {Flex(36), Flex(39), Flex(32), Flex(33), Flex(26)}; // Analog pin
 
 // Calibration variables for flex sensors
 #define VCC 3.3  // Supply voltage for flex sensors
-#define R_DIV 15150.0  // New R_DIV value for 3.3V setup
-#define flatResistance 32500.0  // Flat resistance of flex sensor
-#define bendResistance 76000.0  // Bent resistance of flex sensor
+#define R_DIV 10000.0  // New R_DIV value for 3.3V setup
+float flatResistance[5] = {45947.55, 39737.26, 40340.83, 46981.09, 42479.89}; // Flat resistance of flex sensor
+#define bendResistance 120000.0  // Bent resistance of flex sensor
 
 const int CALIBRATION_ITERATIONS = 1000;
 const float MAX_SENSOR_VALUE = 4095.0;
@@ -263,15 +263,20 @@ void calibrateSensors() {
     }
 }
 
+// Modify processSensorData to use the specific flat resistance values for each sensor
 void processSensorData(float* angles) {
     for (int i = 0; i < 5; i++) {
         flex[i].updateVal();
         float Vflex = flex[i].getSensorValue() * VCC / 4095.0;
         float Rflex = R_DIV * (VCC / Vflex - 1.0);
-        float angle = map(Rflex, flatResistance, bendResistance, 0, 90);
+        
+        // Use specific flat resistance for each sensor
+        float angle = map(Rflex, flatResistance[i], bendResistance, 0, 90);
+        
         if (angle < 0) {
             angle = 0;
         }
+        
         dataArray[i] = static_cast<int16_t>(angle);
     }
 }
