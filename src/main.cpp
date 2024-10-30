@@ -317,18 +317,25 @@ void loop()
     dataArray[7] = static_cast<int16_t>(g.gyro.z * 100);
 
     // Read accelerometer values
-    dataArray[8] = static_cast<int16_t>(a.acceleration.x * 100); // Scale to avoid floating point
+    dataArray[8] = static_cast<int16_t>(-a.acceleration.x * 100); // Scale to avoid floating point
     dataArray[9] = static_cast<int16_t>(a.acceleration.y * 100);
     dataArray[10] = static_cast<int16_t>(a.acceleration.z * 100);
 
     sendDataIfNeeded();
 
     for (int i = 0; i < 11; i++) {
+    if (i >= 5 && i <= 10) {
+        // For scaled gyroscope and accelerometer values, divide by 100.0 to convert back to float
+        Serial.print(dataArray[i] / 100.0, 2);  // 2 decimal places for clarity
+    } else {
+        // Print other values as they are
         Serial.print(dataArray[i]);
-        if (i < 10) {
-            Serial.print(", ");
-        }
     }
+
+    if (i < 10) {
+        Serial.print(", ");
+    }
+}
 
     // Check if the button is pressed
     if (digitalRead(buttonPin) == LOW)
