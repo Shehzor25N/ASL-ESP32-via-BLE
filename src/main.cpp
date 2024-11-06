@@ -1,3 +1,12 @@
+
+// LOOK INTO FLOATING POINTS FOR MPU6050 VALUES
+
+
+
+
+
+
+
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <BLEUtils.h>
