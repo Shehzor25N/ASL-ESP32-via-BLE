@@ -28,11 +28,15 @@ Adafruit_MPU6050 mpu;
 Flex flex[5] = {Flex(36), Flex(39), Flex(32), Flex(33), Flex(26)}; // Analog pins the flex sensors are on
 
 
+
 // Calibration variables for flex sensors
-#define VCC 3.3  // Supply voltage for flex sensors
+#define VCC 5  // Supply voltage for flex sensors
 #define R_DIV 10000.0  // New R_DIV value for 3.3V setup
-float flatResistance[5] = {45947.55, 39737.26, 40340.83, 46981.09, 42479.89}; // Flat resistance of flex sensor
-#define bendResistance 120000.0  // Bent resistance of flex sensor
+float flatResistance[5] = {54642.00, 57937.00, 44730.00, 60732.00, 48805.00}; // Flat resistance of flex sensor
+float bendResistance[5] = {158494.00, 125896.00, 68138.00, 136138.00, 134915.00}; // Bend resistance of flex sensor
+
+
+
 
 const int CALIBRATION_ITERATIONS = 1000;
 const float MAX_SENSOR_VALUE = 4095.0;
@@ -280,7 +284,7 @@ void processSensorData(float* angles) {
         float Rflex = R_DIV * (VCC / Vflex - 1.0);
         
         // Use specific flat resistance for each sensor
-        float angle = map(Rflex, flatResistance[i], bendResistance, 0, 90);
+        float angle = map(Rflex, flatResistance[i], bendResistance[i], 0, 90);
         
         if (angle < 0) {
             angle = 0;
@@ -363,6 +367,7 @@ void loop()
       delay(200);
     }
   }
+  delay(1000); // Delay for 1 second
 }
 
 // Helper function to display a small status message in the bottom-left corner

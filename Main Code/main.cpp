@@ -21,7 +21,7 @@ Flex flex[5] = {Flex(36), Flex(39), Flex(32), Flex(33), Flex(26)}; // Analog pin
 
 // Calibration variables for flex sensors
 #define VCC 3.3  // Supply voltage for flex sensors
-#define R_DIV 15150.0  // New R_DIV value for 3.3V setup
+#define R_DIV 10000.0  // New R_DIV value for 3.3V setup
 #define flatResistance 32500.0  // Flat resistance of flex sensor
 #define bendResistance 76000.0  // Bent resistance of flex sensor
 
